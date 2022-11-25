@@ -61,6 +61,11 @@ public class DefaultMQTTHandler extends MQTTHandler {
     public static final String ATTRIBUTE_WRITE_TOPIC = "writeattribute";
     public static final String ATTRIBUTE_VALUE_TOPIC = "attributevalue";
     public static final String ATTRIBUTE_VALUE_WRITE_TOPIC = "writeattributevalue";
+
+    public static final String SYSLOG_TOPIC = "syslog";
+//    public static final String SYSLOG_WRITE_TOPIC = "writesyslog";
+//    public static final String SYSLOG_VALUE_TOPIC = "syslogvalue";
+//    public static final String SYSLOG_VALUE_WRITE_TOPIC = "writesyslogvalue";
     private static final Logger LOG = SyslogCategory.getLogger(API, DefaultMQTTHandler.class);
     protected AssetStorageService assetStorageService;
 
@@ -120,6 +125,7 @@ public class DefaultMQTTHandler extends MQTTHandler {
     @Override
     public boolean canSubscribe(RemotingConnection connection, KeycloakSecurityContext securityContext, Topic topic) {
 
+        System.out.println("canSubscribe");
         if (!isKeycloak) {
             LOG.fine("Identity provider is not keycloak");
             return false;
@@ -211,30 +217,10 @@ public class DefaultMQTTHandler extends MQTTHandler {
             return false;
         }
 
+        System.out.println("subsription is ok");
+
         return true;
 
-//            Asset<?> asset;
-//            if(identityProvider.isRestrictedUser(authContext.getUserId())) {
-//                Optional<UserAssetLink> userAsset = assetStorageService.findUserAssets(connection.realm, authContext.getUserId(), assetId).stream().findFirst();
-//                asset = userAsset.map(value -> assetStorageService.find(value.getId().getAssetId())).orElse(null);
-//            } else {
-//                asset = assetStorageService.find(assetId, false);
-//            }
-//
-//            if (asset == null) {
-//                LOG.fine("Asset not found for topic '" + topic + "': " + connection);
-//                return false;
-//            }
-//
-//            if (isAttributeTopic && topicTokenCountGreaterThan(topic, 4)
-//                && !(Token.topic.getTokens().get(4)SINGLE_LEVEL_WILDCARD.equals(topicTokens.get(4)) || MULTI_LEVEL_WILDCARD.equals(topicTokens.get(4)))) {
-//                String attributeName = topicTokens.get(4);
-//
-//                if (!asset.hasAttribute(attributeName)) {
-//                    LOG.fine("Asset attribute not found for topic '" + topic + "': " + connection);
-//                    return false;
-//                }
-//            }
     }
 
     @Override
@@ -272,7 +258,7 @@ public class DefaultMQTTHandler extends MQTTHandler {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public void onSubscribe(RemotingConnection connection, Topic topic) {
-
+        System.out.println("onSubscribe");
         boolean isAssetTopic = isAssetTopic(topic);
         String subscriptionId = topic.getString(); // Use topic as unique subscription ID
         AssetFilter filter = buildAssetFilter(topic);
@@ -311,24 +297,39 @@ public class DefaultMQTTHandler extends MQTTHandler {
     public Set<String> getPublishListenerTopics() {
         return Set.of(
             TOKEN_SINGLE_LEVEL_WILDCARD + "/" + TOKEN_SINGLE_LEVEL_WILDCARD + "/" + ATTRIBUTE_WRITE_TOPIC + "/" + TOKEN_MULTI_LEVEL_WILDCARD,
-            TOKEN_SINGLE_LEVEL_WILDCARD + "/" + TOKEN_SINGLE_LEVEL_WILDCARD + "/" + ATTRIBUTE_VALUE_WRITE_TOPIC + "/" + TOKEN_MULTI_LEVEL_WILDCARD
+            TOKEN_SINGLE_LEVEL_WILDCARD + "/" + TOKEN_SINGLE_LEVEL_WILDCARD + "/" + ATTRIBUTE_VALUE_WRITE_TOPIC + "/" + TOKEN_MULTI_LEVEL_WILDCARD, TOKEN_SINGLE_LEVEL_WILDCARD + "/" + TOKEN_SINGLE_LEVEL_WILDCARD + "/" + SYSLOG_TOPIC + "/" + TOKEN_MULTI_LEVEL_WILDCARD
         );
     }
 
     @Override
     public void onPublish(RemotingConnection connection, Topic topic, ByteBuf body) {
+        System.out.println("onPublish");
+
         List<String> topicTokens = topic.getTokens();
         boolean isValueWrite = topicTokens.get(2).equals(ATTRIBUTE_VALUE_WRITE_TOPIC);
+        boolean isValueSyslog = topicTokens.get(2).equals(SYSLOG_TOPIC);
+
         String payloadContent = body.toString(StandardCharsets.UTF_8);
         AttributeEvent attributeEvent;
 
+
         if (isValueWrite) {
-            String attributeName = topicTokens.get(3);
-            String assetId = topicTokens.get(4);
-            Object value = ValueUtil.parse(payloadContent).orElse(null);
-            attributeEvent = new AttributeEvent(assetId, attributeName, value);
+//
+                String attributeName = topicTokens.get(3);
+                String assetId = topicTokens.get(4);
+                Object value = ValueUtil.parse(payloadContent).orElse(null);
+                attributeEvent = new AttributeEvent(assetId, attributeName, value);
+
         } else {
             attributeEvent = ValueUtil.parse(payloadContent, AttributeEvent.class).orElse(null);
+        }
+        if (isValueSyslog){
+            if (topicTokens.size()==3){
+                String attributeName = topicTokens.get(2);
+                String assetId ="syslog";
+                Object value = ValueUtil.parse(payloadContent).orElse(null);
+                attributeEvent = new AttributeEvent(assetId, attributeName, value);
+            }
         }
 
         if (attributeEvent == null) {
@@ -424,6 +425,7 @@ public class DefaultMQTTHandler extends MQTTHandler {
     }
 
     protected Consumer<SharedEvent> getSubscriptionEventConsumer(RemotingConnection connection, Topic topic) {
+        System.out.println("getSubscriptionEventConsumer");
         boolean isValueSubscription = ATTRIBUTE_VALUE_TOPIC.equalsIgnoreCase(topicTokenIndexToString(topic, 2));
         boolean isAssetTopic = isAssetTopic(topic);
 
@@ -474,6 +476,7 @@ public class DefaultMQTTHandler extends MQTTHandler {
             }
         };
     }
+
 
     protected static boolean isAttributeTopic(Topic topic) {
         return ATTRIBUTE_TOPIC.equalsIgnoreCase(topicTokenIndexToString(topic, 2)) || ATTRIBUTE_VALUE_TOPIC.equalsIgnoreCase(topicTokenIndexToString(topic, 2));

@@ -24,6 +24,9 @@ dependencies {
     implementation "io.swagger.core.v3:swagger-jaxrs2:$swaggerVersion"
     implementation "org.openjdk.nashorn:nashorn-core:$nashornVersion"
 
+    api 'com.rabbitmq:amqp-client:5.16.0'
+
+
     implementation ("io.netty:netty-codec-http:$nettyVersion") {
         force = true
     }

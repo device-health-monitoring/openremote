@@ -22,12 +22,9 @@ package org.openremote.manager.agent;
 import org.apache.camel.builder.RouteBuilder;
 import org.openremote.agent.protocol.ProtocolAssetService;
 import org.openremote.container.message.MessageBrokerService;
+import org.openremote.manager.asset.*;
 import org.openremote.model.PersistenceEvent;
 import org.openremote.container.timer.TimerService;
-import org.openremote.manager.asset.AssetProcessingException;
-import org.openremote.manager.asset.AssetProcessingService;
-import org.openremote.manager.asset.AssetStorageService;
-import org.openremote.manager.asset.AssetUpdateProcessor;
 import org.openremote.manager.event.ClientEventService;
 import org.openremote.manager.gateway.GatewayService;
 import org.openremote.manager.security.ManagerIdentityService;
@@ -91,6 +88,8 @@ public class AgentService extends RouteBuilder implements ContainerService, Asse
     protected TimerService timerService;
     protected ManagerIdentityService identityService;
     protected AssetProcessingService assetProcessingService;
+    protected SyslogProcessingService syslogProcessingService;
+
     protected AssetStorageService assetStorageService;
     protected MessageBrokerService messageBrokerService;
     protected ClientEventService clientEventService;
@@ -114,6 +113,7 @@ public class AgentService extends RouteBuilder implements ContainerService, Asse
         timerService = container.getService(TimerService.class);
         identityService = container.getService(ManagerIdentityService.class);
         assetProcessingService = container.getService(AssetProcessingService.class);
+        syslogProcessingService = container.getService(SyslogProcessingService.class);
         assetStorageService = container.getService(AssetStorageService.class);
         messageBrokerService = container.getService(MessageBrokerService.class);
         clientEventService = container.getService(ClientEventService.class);

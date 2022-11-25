@@ -10,6 +10,7 @@ org.openremote.manager.asset.AssetStorageService
 org.openremote.manager.datapoint.AssetDatapointService
 org.openremote.manager.asset.AttributeLinkingService
 org.openremote.manager.asset.AssetProcessingService
+org.openremote.manager.asset.SyslogProcessingService
 org.openremote.container.message.MessageBrokerService
 org.openremote.manager.system.HealthStatusService
 org.openremote.manager.agent.AgentService

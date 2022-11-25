@@ -150,8 +150,8 @@ public class MQTTBrokerService extends RouteBuilder implements ContainerService,
 
         // Load custom handlers
         this.customHandlers = stream(ServiceLoader.load(MQTTHandler.class).spliterator(), false)
-            .sorted(Comparator.comparingInt(MQTTHandler::getPriority))
-            .collect(Collectors.toList());
+                .sorted(Comparator.comparingInt(MQTTHandler::getPriority))
+                .collect(Collectors.toList());
 
         // Configure and start the broker
         Configuration config = new ConfigurationImpl();
@@ -174,12 +174,12 @@ public class MQTTBrokerService extends RouteBuilder implements ContainerService,
             @Override
             public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
                 return new AppConfigurationEntry[] {
-                    new AppConfigurationEntry(GuestLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.SUFFICIENT, Map.of("debug", "true", "credentialsInvalidate", "true")),
-                    new AppConfigurationEntry(MultiTenantClientCredentialsGrantsLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.REQUISITE, Map.of(
-                        MultiTenantClientCredentialsGrantsLoginModule.INCLUDE_REALM_ROLES_OPTION, "true",
-                        AbstractKeycloakLoginModule.ROLE_PRINCIPAL_CLASS_OPTION, RolePrincipal.class.getName()
-                    )),
-                    new AppConfigurationEntry(PrincipalConversionLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.REQUISITE, Map.of(PrincipalConversionLoginModule.PRINCIPAL_CLASS_LIST, KeycloakPrincipal.class.getName()))
+                        new AppConfigurationEntry(GuestLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.SUFFICIENT, Map.of("debug", "true", "credentialsInvalidate", "true")),
+                        new AppConfigurationEntry(MultiTenantClientCredentialsGrantsLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.REQUISITE, Map.of(
+                                MultiTenantClientCredentialsGrantsLoginModule.INCLUDE_REALM_ROLES_OPTION, "true",
+                                AbstractKeycloakLoginModule.ROLE_PRINCIPAL_CLASS_OPTION, RolePrincipal.class.getName()
+                        )),
+                        new AppConfigurationEntry(PrincipalConversionLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.REQUISITE, Map.of(PrincipalConversionLoginModule.PRINCIPAL_CLASS_LIST, KeycloakPrincipal.class.getName()))
                 };
             }
         }));
@@ -235,40 +235,40 @@ public class MQTTBrokerService extends RouteBuilder implements ContainerService,
     @Override
     public void configure() throws Exception {
         from(PERSISTENCE_TOPIC)
-            .routeId("UserPersistenceChanges")
-            .filter(body().isInstanceOf(PersistenceEvent.class))
-            .process(exchange -> {
-                PersistenceEvent<?> persistenceEvent = (PersistenceEvent<?>)exchange.getIn().getBody(PersistenceEvent.class);
+                .routeId("UserPersistenceChanges")
+                .filter(body().isInstanceOf(PersistenceEvent.class))
+                .process(exchange -> {
+                    PersistenceEvent<?> persistenceEvent = (PersistenceEvent<?>)exchange.getIn().getBody(PersistenceEvent.class);
 
-                if (persistenceEvent.getEntity() instanceof User user) {
+                    if (persistenceEvent.getEntity() instanceof User user) {
 
-                    if (!user.isServiceAccount()) {
-                        return;
+                        if (!user.isServiceAccount()) {
+                            return;
+                        }
+
+                        boolean forceDisconnect = persistenceEvent.getCause() == PersistenceEvent.Cause.DELETE;
+
+                        if (persistenceEvent.getCause() == PersistenceEvent.Cause.UPDATE) {
+                            // Force disconnect if certain properties have changed
+                            forceDisconnect = Arrays.stream(persistenceEvent.getPropertyNames()).anyMatch((propertyName) ->
+                                    (propertyName.equals("enabled") && !user.getEnabled())
+                                            || propertyName.equals("username")
+                                            || propertyName.equals("secret"));
+                        }
+
+                        if (forceDisconnect) {
+                            LOG.info("User modified or deleted so force closing any sessions for this user: " + user);
+                            // Find existing connection for this user
+                            forceDisconnectUser(user.getId());
+                        }
+
+                    } else if (persistenceEvent.getEntity() instanceof UserAssetLink userAssetLink) {
+                        String userID = userAssetLink.getId().getUserId();
+
+                        // Debounce force disconnect of this user's sessions
+                        userAssetDisconnectDebouncer.call(userID);
                     }
-
-                    boolean forceDisconnect = persistenceEvent.getCause() == PersistenceEvent.Cause.DELETE;
-
-                    if (persistenceEvent.getCause() == PersistenceEvent.Cause.UPDATE) {
-                        // Force disconnect if certain properties have changed
-                        forceDisconnect = Arrays.stream(persistenceEvent.getPropertyNames()).anyMatch((propertyName) ->
-                            (propertyName.equals("enabled") && !user.getEnabled())
-                                || propertyName.equals("username")
-                                || propertyName.equals("secret"));
-                    }
-
-                    if (forceDisconnect) {
-                        LOG.info("User modified or deleted so force closing any sessions for this user: " + user);
-                        // Find existing connection for this user
-                        forceDisconnectUser(user.getId());
-                    }
-
-                } else if (persistenceEvent.getEntity() instanceof UserAssetLink userAssetLink) {
-                    String userID = userAssetLink.getId().getUserId();
-
-                    // Debounce force disconnect of this user's sessions
-                    userAssetDisconnectDebouncer.call(userID);
-                }
-            });
+                });
     }
 
     @Override
@@ -277,14 +277,14 @@ public class MQTTBrokerService extends RouteBuilder implements ContainerService,
         LOG.fine("Stopped MQTT broker");
 
         stream(ServiceLoader.load(MQTTHandler.class).spliterator(), false)
-            .sorted(Comparator.comparingInt(MQTTHandler::getPriority).reversed())
-            .forEach(handler -> {
-                try {
-                    handler.stop();
-                } catch (Exception e) {
-                    LOG.log(Level.WARNING, "MQTT custom handler threw an exception whilst stopping: handler=" + handler.getName(), e);
-                }
-            });
+                .sorted(Comparator.comparingInt(MQTTHandler::getPriority).reversed())
+                .forEach(handler -> {
+                    try {
+                        handler.stop();
+                    } catch (Exception e) {
+                        LOG.log(Level.WARNING, "MQTT custom handler threw an exception whilst stopping: handler=" + handler.getName(), e);
+                    }
+                });
     }
 
     @Override

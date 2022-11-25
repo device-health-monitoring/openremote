@@ -24,17 +24,21 @@ import org.openremote.model.event.shared.SharedEvent;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.util.*;
 
 import static org.openremote.model.Constants.PERSISTENCE_SEQUENCE_ID_GENERATOR;
 
 @Entity
 @Table(name = "SYSLOG_EVENT")
-public class SyslogEvent extends SharedEvent {
+public class SyslogEvent extends SharedEvent implements Serializable {
+
+    public static final String HEADER_SOURCE = SyslogEvent.class.getName() + ".SOURCE";
 
     static public class LevelCategoryFilter extends EventFilter<SyslogEvent> {
 
         public static final String FILTER_TYPE = "level-category-filter";
+
 
         protected SyslogLevel level;
         protected List<SyslogCategory> categories = new ArrayList<>();
@@ -47,6 +51,8 @@ public class SyslogEvent extends SharedEvent {
             this.level = level;
             this.categories = categories != null ? Arrays.asList(categories) : Collections.EMPTY_LIST;
         }
+
+
 
         @Override
         public String getFilterType() {

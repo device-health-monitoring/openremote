@@ -225,6 +225,7 @@ public class AssetProcessingService extends RouteBuilder implements ContainerSer
     @Override
     public void configure() throws Exception {
 
+        System.out.println("asset processing configure");
         // A client wants to write attribute state through event bus
         from(CLIENT_EVENT_TOPIC)
             .routeId("FromClientUpdates")
@@ -400,6 +401,7 @@ public class AssetProcessingService extends RouteBuilder implements ContainerSer
                         }
                     );
 
+                    System.out.println("OOOO VALUE TOPLOTO"+ value);
                     // Create a copy of the attribute and set the new value and timestamp
                     Attribute updatedAttribute = ValueUtil.clone(oldAttribute);
                     updatedAttribute.setValue(value, eventTime);
@@ -439,6 +441,7 @@ public class AssetProcessingService extends RouteBuilder implements ContainerSer
                                          Attribute<?> attribute,
                                          Source source) throws AssetProcessingException {
 
+        System.out.println("processAssetUpdate");
         String attributeStr = "Asset ID=" + asset.getId() + ", Asset name=" + asset.getName() + ", " + attribute;
 
         LOG.fine(">>> Processing start: " + attributeStr);

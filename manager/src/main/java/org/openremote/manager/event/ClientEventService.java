@@ -100,7 +100,7 @@ public class ClientEventService implements ContainerService {
         }
     }
 
-    public static final int PRIORITY = ManagerWebService.PRIORITY - 200;
+    public static final int PRIORITY = Integer.MAX_VALUE - 1000 + 100 - 200;
     public static final String HEADER_CONNECTION_TYPE = ClientEventService.class.getName() + ".HEADER_CONNECTION_TYPE";
     public static final String HEADER_CONNECTION_TYPE_WEBSOCKET = ClientEventService.class.getName() + ".HEADER_CONNECTION_TYPE_WEBSOCKET";
     public static final String HEADER_CONNECTION_TYPE_MQTT = ClientEventService.class.getName() + ".HEADER_CONNECTION_TYPE_MQTT";
