@@ -10,6 +10,7 @@ mainClassName = "org.openremote.manager.Main"
 
 dependencies {
 
+//    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.3.0-rc1'
     api resolveProject(":container")
     api resolveProject(":agent")
     api resolveProject(":model")
@@ -30,6 +31,8 @@ dependencies {
     implementation ("io.netty:netty-codec-http:$nettyVersion") {
         force = true
     }
+
+    api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
 
     // Exposed via MQTT API
     api ("io.netty:netty-codec-mqtt:$nettyVersion") {
@@ -128,3 +131,5 @@ task setVersionProperties(type: WriteProperties) {
 }
 publish.mustRunAfter(setVersionProperties)
 publish.dependsOn(setVersionProperties)
+
+

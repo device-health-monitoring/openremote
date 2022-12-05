@@ -401,7 +401,6 @@ public class AssetProcessingService extends RouteBuilder implements ContainerSer
                         }
                     );
 
-                    System.out.println("OOOO VALUE TOPLOTO"+ value);
                     // Create a copy of the attribute and set the new value and timestamp
                     Attribute updatedAttribute = ValueUtil.clone(oldAttribute);
                     updatedAttribute.setValue(value, eventTime);

@@ -125,7 +125,6 @@ public class DefaultMQTTHandler extends MQTTHandler {
     @Override
     public boolean canSubscribe(RemotingConnection connection, KeycloakSecurityContext securityContext, Topic topic) {
 
-        System.out.println("canSubscribe");
         if (!isKeycloak) {
             LOG.fine("Identity provider is not keycloak");
             return false;
@@ -217,8 +216,6 @@ public class DefaultMQTTHandler extends MQTTHandler {
             return false;
         }
 
-        System.out.println("subsription is ok");
-
         return true;
 
     }
@@ -258,7 +255,6 @@ public class DefaultMQTTHandler extends MQTTHandler {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public void onSubscribe(RemotingConnection connection, Topic topic) {
-        System.out.println("onSubscribe");
         boolean isAssetTopic = isAssetTopic(topic);
         String subscriptionId = topic.getString(); // Use topic as unique subscription ID
         AssetFilter filter = buildAssetFilter(topic);
@@ -303,8 +299,6 @@ public class DefaultMQTTHandler extends MQTTHandler {
 
     @Override
     public void onPublish(RemotingConnection connection, Topic topic, ByteBuf body) {
-        System.out.println("onPublish");
-
         List<String> topicTokens = topic.getTokens();
         boolean isValueWrite = topicTokens.get(2).equals(ATTRIBUTE_VALUE_WRITE_TOPIC);
         boolean isValueSyslog = topicTokens.get(2).equals(SYSLOG_TOPIC);

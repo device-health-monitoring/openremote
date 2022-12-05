@@ -124,7 +124,6 @@ public class SyslogProcessingService extends RouteBuilder implements ContainerSe
     @Override
     public void configure() throws Exception {
 
-        System.out.println("processing service configure");
         from(CLIENT_EVENT_TOPIC)
                 .routeId("FromClientUpdates")
                 .filter(body().isInstanceOf(AttributeEvent.class))
@@ -146,19 +145,9 @@ public class SyslogProcessingService extends RouteBuilder implements ContainerSe
                         throw new SyslogProcessingException(SyslogReadFailure.MISSING_SOURCE);
                     }
 
-                    System.out.println("value e pedal");
-
-                    System.out.println(event);
 
                     Object value = event.getValue().orElse("");
 
-
-                    if (value!=null){
-                        System.out.println("ne e nula:  " + value);
-                    }
-                    else{
-                        System.out.println("kurvi belo");
-                    }
 
                     processSyslog(value.toString());
 
@@ -185,8 +174,6 @@ public class SyslogProcessingService extends RouteBuilder implements ContainerSe
     }
 
     protected boolean processSyslog(String syslog) throws SyslogProcessingException {
-
-        System.out.println("processSyslog");
         return true;
     }
 

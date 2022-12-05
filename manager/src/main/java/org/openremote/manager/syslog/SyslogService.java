@@ -19,24 +19,21 @@
  */
 package org.openremote.manager.syslog;
 
-import io.netty.handler.codec.mqtt.MqttQoS;
-import org.apache.commons.lang.SerializationUtils;
-import org.openremote.container.message.MessageBrokerService;
-import org.openremote.manager.mqtt.DefaultMQTTHandler;
-import org.openremote.manager.mqtt.MQTTBrokerService;
-import org.openremote.model.Container;
-import org.openremote.model.ContainerService;
-import org.openremote.container.persistence.PersistenceService;
-import org.openremote.manager.event.ClientEventService;
-import org.openremote.manager.web.ManagerWebService;
-import com.rabbitmq.client.MessageProperties;
-
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.MessageProperties;
+import org.openremote.container.persistence.PersistenceService;
+import org.openremote.manager.event.ClientEventService;
+import org.openremote.manager.mqtt.DefaultMQTTHandler;
+import org.openremote.manager.mqtt.MQTTBrokerService;
+import org.openremote.manager.web.ManagerWebService;
 import org.openremote.model.Constants;
-import org.openremote.model.provisioning.ErrorResponseMessage;
+import org.openremote.model.Container;
+import org.openremote.model.ContainerService;
 import org.openremote.model.syslog.SyslogCategory;
 import org.openremote.model.syslog.SyslogConfig;
 import org.openremote.model.syslog.SyslogEvent;
@@ -44,9 +41,7 @@ import org.openremote.model.syslog.SyslogLevel;
 import org.openremote.model.util.Pair;
 
 import javax.persistence.TypedQuery;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -61,6 +56,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
+
 import java.util.logging.Logger;
 
 /**
@@ -197,18 +193,6 @@ public class SyslogService extends Handler implements ContainerService {
         }
     }
 
-    // Convert object to byte[]
-    public static byte[] convertObjectToBytes(Object obj) {
-        ByteArrayOutputStream boas = new ByteArrayOutputStream();
-        try (ObjectOutputStream ois = new ObjectOutputStream(boas)) {
-            ois.writeObject(obj);
-            return boas.toByteArray();
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
-        }
-        throw new RuntimeException();
-    }
-
     @Override
     public void publish(LogRecord record) {
         SyslogEvent syslogEvent = SyslogCategory.mapSyslogEvent(record);
@@ -217,14 +201,8 @@ public class SyslogService extends Handler implements ContainerService {
         if (syslogEvent != null) {
             try {
 
-                emitLog(syslogEvent.toString());
+                    emitLog(syslogEvent.toString());
 
-//                byte[] s = SerializationUtils.serialize(record);
-//                                emitLog(convertObjectToBytes(s));
-
-
-
-//                store(syslogEvent);
             } catch (Exception e) {
                 LOG.log(Level.SEVERE, "Failed to store syslog event", e);
             }
@@ -379,4 +357,5 @@ public class SyslogService extends Handler implements ContainerService {
     public String toString() {
         return getClass().getSimpleName() + "{}";
     }
+
 }

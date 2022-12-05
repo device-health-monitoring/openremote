@@ -161,10 +161,11 @@ public class SyslogEvent extends SharedEvent implements Serializable {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "{" +
-            "level=" + level +
-            ", category=" + category +
-            ", subCategory=" + subCategory +
-            ", message='" + message + '\'' +
-            '}';
+                "level=" + level +
+                ", category=" + category +
+                ", subCategory=" + subCategory +
+                ", timestamp=" + timestamp.getTime() +
+                ", message=\"" + message + '\"' +
+                '}';
     }
 }

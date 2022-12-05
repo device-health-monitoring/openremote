@@ -37,7 +37,11 @@ dependencies {
     //api "com.kjetland:mbknor-jackson-jsonschema_2.12:1.0.39"
     api "org.scala-lang:scala-library:2.12.10"
     api "io.github.classgraph:classgraph:$classgraphVersion"
+
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.3.0-rc1'
+
 }
+
 
 jar {
     from sourceSets.main.allJava
